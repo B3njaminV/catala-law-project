@@ -10,8 +10,11 @@
 
 ## 📣 Introduction
 
-Notre projet multidisciplinaire consiste à traduire un texte de loi américain en langage de programmation Catala.
-Catala est un langage open-source, développé en collaboration entre juriste et développeur afin de simplifier le quotidien des juristes dans les démarches administratives.
+Le projet « Catala : traduire la loi en code » est un projet multidisciplinaire consistant en la traduction d'un texte de loi américain en Catala. 
+
+Catala est un langage de programmation qui a été créé dans le but de remédier à la mauvaise implémentation informatique des lois induite par des dysfonctionnements de programmes informatiques. Il s'agit d'un langage open-source, c'est-à-dire que tout le monde a accès à l’intégralité de son code informatique ainsi qu'à son historique de modification. Aussi, Catala résulte d'une collaboration entre juristes et développeurs ce qui permet d’éviter toute déformation des textes de loi résultant d’une mauvaise compréhension par les informaticiens, et garantit la bonne implémentation informatique de la loi.
+
+Dans ce projet, le texte de loi traduit en Catala s'intitule « 26 U.S. Code § 121 - Exclusion of gain from sale of principal residence ». Ce texte est un article du code des États-Unis d’Amérique traitant des limites et des règles spécifiques concernant l’abattement d’impôt sur une plus-value réalisée lors de la vente d’une résidence principale.
 
 ## ‍💻 Installation
 
