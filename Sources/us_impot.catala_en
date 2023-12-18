@@ -1,65 +1,198 @@
 # Premier test avec Catala
 
-```catala-metadata
-declaration structure Person:
-  data id content integer
-```
+#########################################################
+####################### STRUCTURE #######################
+#########################################################
+# Cette partie résume les structures
+# Une structure est un ensemble de données 
+# Equivalent d'une classe en Java par exemple
+#########################################################
+#########################################################
 
+## Structure Contribuable
+### Un contribuable est une personne qui paie des impôts 
 ```catala-metadata
 declaration structure Contribuable:
-  data revenu_brut content argent
+  data revenu_brut content money
   data statut content Statut
+  data date_deces content date
+  data inapte content boolean
 ```
 
+## Enumeration Statut
+### Un contribuable est soit marié soit célibataire (dans notre cas)
 ```catala-metadata
 declaration enumeration Statut  :
   -- MARIE
-  -- VEUF
   -- CELIBATAIRE
-  -- DIVORCE
 ```
 
+## Structure Vente
+### Une vente est une transaction immobilière
 ```catala-metadata
 declaration structure Vente:
-  data gain content argent
-  data date content date
+  data gain content money
+  data date_vente content date
   data date_debut_occupation content date
   data date_fin_occupation content date
 ```
 
+##########################################################
+####################### LIMITATION #######################
+##########################################################
+# Cette partie résume les conditions dites de "limitation"
+# Une condition renverra true si elle est vérifiée
+# et false si elle ne l'est pas
+##########################################################
+##########################################################
+
+####################### DEBUT CONDITION 1 #######################
+
+## Le Contribuable a possédé le bien pendant au moins 2 ans
+```catala-metadata
+declaration scope ConditionOne_Part1 :
+  input contribuable content Contribuable
+  input vente content Vente
+  output valid_part1 content boolean
+  internal occupation_time content duration
+```
 ```catala
+scope ConditionOne_Part1:
+  definition valid_part1 equals
+    if (vente.date_fin_occupation - vente.date_debut_occupation) > 2 then
+      true
+    else
+      false
+```
+
+## Le Contribuable a possédé le bien pendant au moins 2 ans
+```catala-metadata
+declaration scope ConditionOne_Part2 :
+  input contribuable content Contribuable
+  input vente content Vente
+  output valid_part2 content boolean
+```
+```catala
+scope ConditionOne_Part2:
+  definition valid_part2 equals true
+```
+
+## Définition du champs d'application
+```catala-metadata
 declaration scope ConditionOne :
   input contribuable content Contribuable
   input vente content Vente
-  context gain_cap content money
-  output cond1 condition
+  part1 scope ConditionOne_Part1
+  part2 scope ConditionOne_Part2
+  output gain_final content money
 ```
 
+## Champs d'application
 ```catala
-scope ConditionOne :
+scope ConditionOne:
+  # On passe les valeurs en "paramètres"
+  definition part1.contribuable equals contribuable
+  definition part1.vente equals vente
+  definition part2.contribuable equals contribuable
+  definition part2.vente equals vente
+
+  # Si les deux conditions sont validées alors le gain en retour vaut le revenu du contribuable + gain de la vente
+  definition gain_final equals
+    if part1.valid_part1 and part2.valid_part2 then
+      contribuable.revenu_brut + vente.gain
+    else
+      contribuable.revenu_brut
+```
+
+## Test unitaire n°1
+## Un contribuable célibataire avec un gain de vente 240 000€
+## Condition 1 doit être validé
+#### Executer : catala Interpret --scope=TestConditionOne_1 us_impot.catala_en
+```catala
+declaration scope TestConditionOne_1:
+  condition1 scope ConditionOne
+  output test_cond1 content money
+
+scope TestConditionOne_1:
+  definition condition1.contribuable equals
+  Contribuable {
+      -- revenu_brut: $100,000
+      -- statut: CELIBATAIRE
+      -- date_deces: |2020-01-01|
+      -- inapte: false
+    }
+
+  definition condition1.vente equals
+  Vente {
+      -- gain: $240,000
+      -- date_vente: |2022-01-01|
+      -- date_debut_occupation: |2020-01-01|
+      -- date_fin_occupation: |2017-01-01|
+    }
+
+  definition test_cond1 equals condition1.gain_final
+  assertion test_cond1 = $340,000
+```
+
+####################### FIN CONDITION 1 #######################
+
+####################### DEBUT CONDITION 2 #######################
+
+## Définitions du champs d'application
+```catala-metadata	
+declaration scope ConditionTwo:
+  output valid_cond2 content boolean
   input contribuable content Contribuable
   input vente content Vente
-  definition gain_cap equals $250,000
-
-  rule cond1 under condition
-    aggregate_periods_from_last_five_years of property_ownage >= 730 day
-  consequence fulfilled
-
-  definition income_excluded_from_gross_income equals
-    if income_excluded_from_gross_income_uncapped >= gain_cap then
-      gain_cap
-    else
-      income_excluded_from_gross_income_uncapped
-
-scope Section121TwoPersons:
-    definition gain_cap equals section121Person1.gain_cap
-
-    definition income_excluded_from_gross_income equals
-    if income_excluded_from_gross_income_uncapped >= gain_cap then
-      gain_cap
-    else
-      income_excluded_from_gross_income_uncapped
 ```
+
+## Champs d'application
+```catala
+scope ConditionTwo:
+  definition valid_cond2
+  under condition vente.gain <= $250,000 and contribuable.statut = CELIBATAIRE consequence
+  equals true
+
+  definition valid_cond2
+  under condition vente.gain <= $500,000 and contribuable.statut = MARIE consequence
+  equals true
+```
+
+## Test unitaire n°2
+## Un contribuable célibataire avec un gain de vente 240 000€
+## Condition 2 doit être validé
+#### Executer : catala Interpret --scope=TestConditionTwo_1 us_impot.catala_en
+```catala
+declaration scope TestConditionTwo_1:
+  condition2 scope ConditionTwo
+  output test_cond2 content boolean
+
+scope TestConditionTwo_1:
+  definition condition2.contribuable equals
+  Contribuable {
+      -- revenu_brut: $100,000
+      -- statut: CELIBATAIRE
+      -- date_deces: |2020-01-01|
+      -- inapte: false
+    }
+
+  definition condition2.vente equals
+  Vente {
+      -- gain: $240,000
+      -- date_vente: |2020-01-01|
+      -- date_debut_occupation: |2010-01-01|
+      -- date_fin_occupation: |2020-01-01|
+    }
+
+  definition test_cond2 equals condition2.valid_cond2
+  assertion test_cond2
+```
+
+####################### FIN CONDITION 2 #######################
+
+
+
+
 
 
 
