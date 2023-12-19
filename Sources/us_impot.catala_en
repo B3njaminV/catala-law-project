@@ -1,5 +1,3 @@
-# Premier test avec Catala
-
 #########################################################
 ####################### STRUCTURE #######################
 #########################################################
@@ -37,76 +35,66 @@ declaration structure Vente:
   data date_fin_occupation content date
 ```
 
-##########################################################
-####################### LIMITATION #######################
-##########################################################
-# Cette partie résume les conditions dites de "limitation"
-# Une condition renverra true si elle est vérifiée
-# et false si elle ne l'est pas
-##########################################################
-##########################################################
+#########################################################
+####################### EXCLUSION #######################
+#########################################################
+# Cette partie résume les conditions dites d'"exclusion"
+# Une condition renverra un résultat (money par ex)
+#########################################################
+#########################################################
 
 ####################### DEBUT CONDITION 1 #######################
-
-## Le Contribuable a possédé le bien pendant au moins 2 ans
-```catala-metadata
-declaration scope ConditionOne_Part1 :
-  input contribuable content Contribuable
-  input vente content Vente
-  output valid_part1 content boolean
-  internal occupation_time content duration
-```
-```catala
-scope ConditionOne_Part1:
-  definition valid_part1 equals
-    if (vente.date_fin_occupation - vente.date_debut_occupation) > 2 then
-      true
-    else
-      false
-```
-
-## Le Contribuable a possédé le bien pendant au moins 2 ans
-```catala-metadata
-declaration scope ConditionOne_Part2 :
-  input contribuable content Contribuable
-  input vente content Vente
-  output valid_part2 content boolean
-```
-```catala
-scope ConditionOne_Part2:
-  definition valid_part2 equals true
-```
 
 ## Définition du champs d'application
 ```catala-metadata
 declaration scope ConditionOne :
   input contribuable content Contribuable
   input vente content Vente
-  part1 scope ConditionOne_Part1
-  part2 scope ConditionOne_Part2
+  internal occupation_time content duration
+  internal five_year_occupation_time content duration
   output gain_final content money
+  output rule_occupation_time condition
+  output rule_five_year_occupation_time condition
+  internal condition1_requirements condition  
 ```
 
 ## Champs d'application
 ```catala
 scope ConditionOne:
-  # On passe les valeurs en "paramètres"
-  definition part1.contribuable equals contribuable
-  definition part1.vente equals vente
-  definition part2.contribuable equals contribuable
-  definition part2.vente equals vente
+
+  ## Le Contribuable a possédé le bien pendant au moins 2 ans
+  definition occupation_time equals vente.date_fin_occupation - vente.date_debut_occupation
+
+  ## Le Contribuable a possédé le bien pendant au moins 2 ans durant les 5 dernières années avant la vente
+  definition five_year_occupation_time equals(
+    if vente.date_vente <= vente.date_debut_occupation + 5 year then
+        vente.date_fin_occupation - vente.date_debut_occupation
+      else (if vente.date_vente >= vente.date_fin_occupation + 5 year then
+        0 day
+      else ((vente.date_fin_occupation + 5 year) - vente.date_vente))
+  )
+
+  rule rule_occupation_time under condition
+    occupation_time >= 730 day
+  consequence fulfilled
+
+  rule rule_five_year_occupation_time under condition
+    five_year_occupation_time >= 730 day
+  consequence fulfilled
+
+  definition condition1_requirements equals
+    rule_occupation_time and rule_five_year_occupation_time
 
   # Si les deux conditions sont validées alors le gain en retour vaut le revenu du contribuable + gain de la vente
   definition gain_final equals
-    if part1.valid_part1 and part2.valid_part2 then
-      contribuable.revenu_brut + vente.gain
-    else
-      contribuable.revenu_brut
+    if condition1_requirements then contribuable.revenu_brut + vente.gain
+    else contribuable.revenu_brut      
 ```
 
 ## Test unitaire n°1
-## Un contribuable célibataire avec un gain de vente 240 000€
-## Condition 1 doit être validé
+## Un contribuable célibataire avec un gain de vente 280 000€
+## Condition 1 doit être invalidé
+## Le gain final doit être égal au revenu brut du contribuable
 #### Executer : catala Interpret --scope=TestConditionOne_1 us_impot.catala_en
 ```catala
 declaration scope TestConditionOne_1:
@@ -124,17 +112,58 @@ scope TestConditionOne_1:
 
   definition condition1.vente equals
   Vente {
-      -- gain: $240,000
+      -- gain: $280,000
       -- date_vente: |2022-01-01|
       -- date_debut_occupation: |2020-01-01|
       -- date_fin_occupation: |2017-01-01|
     }
 
   definition test_cond1 equals condition1.gain_final
-  assertion test_cond1 = $340,000
+  assertion test_cond1 = $100,000
+```
+
+## Test unitaire n°2
+## Un contribuable célibataire avec un gain de vente 120 000€
+## Condition 1 doit être validé
+## Le gain final doit être égal au revenu brut du contribuable + gain de la vente
+#### Executer : catala Interpret --scope=TestConditionOne_2 us_impot.catala_en
+```catala
+declaration scope TestConditionOne_2:
+  condition1 scope ConditionOne
+  output test_cond1 content money
+
+scope TestConditionOne_2:
+  definition condition1.contribuable equals
+  Contribuable {
+      -- revenu_brut: $100,000
+      -- statut: CELIBATAIRE
+      -- date_deces: |2020-01-01|
+      -- inapte: false
+    }
+
+  definition condition1.vente equals
+  Vente {
+      -- gain: $120,000
+      -- date_vente: |2022-01-01|
+      -- date_debut_occupation: |2020-01-01|
+      -- date_fin_occupation: |2017-01-01|
+    }
+
+  definition test_cond1 equals condition1.gain_final
+  assertion test_cond1 = $220,000
 ```
 
 ####################### FIN CONDITION 1 #######################
+
+
+##########################################################
+####################### LIMITATION #######################
+##########################################################
+# Cette partie résume les conditions dites de "limitation"
+# Une condition renverra true si elle est vérifiée
+# et false si elle ne l'est pas
+##########################################################
+##########################################################
 
 ####################### DEBUT CONDITION 2 #######################
 
