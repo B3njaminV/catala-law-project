@@ -53,6 +53,15 @@ dépasser les 250,000$ mais ne peut pas excéder les 500,000$.h
 
 * LinkedIn: [@BENTIVOGLIO Chloe](https://fr.linkedin.com/in/chlo%C3%A9-bentivoglio-a21606239)
 
+## ⚗️ Tuteur
+
+👤 **LOZES Etienne**
+
+* I3S: [Etienne LOZES](https://webusers.i3s.unice.fr/~elozes/)
+
+👤 **FILLASTRE Martha**
+
+* LinkedIn: [@FILLASTRE Martha](https://fr.linkedin.com/in/martha-fillastre-02a2645/fr)
 
 ## 📝 License
 
