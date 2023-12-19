@@ -44,6 +44,10 @@ declaration structure Vente:
 #########################################################
 
 ####################### DEBUT CONDITION 1 #######################
+# Le revenu brut du contribuable ne doit pas prendre en compte le gain résultant de la vente d’un bien immobilier si :
+# Le contribuable a possédé et occupé le bien comme résidence principale pendant deux ans ou plus.
+# Cette période de deux années ou plus est comprise dans les cinq années se terminant à la date de la vente de la résidence principale.
+##################################################################
 
 ## Définition du champs d'application
 ```catala-metadata
@@ -166,6 +170,9 @@ scope TestConditionOne_2:
 ##########################################################
 
 ####################### DEBUT CONDITION 2 #######################
+# Le gain résultant de la vente d’une résidence principale ne doit pas excéder les 250,000$ sauf :
+# Pour les couples ayant fait une déclaration de revenu commune pour l’année d’imposition la vente d’une résidence principale. Dans ce cas de figure, le gain peut dépasser les 250,000$ mais ne peut pas excéder les 500,000$.h
+##################################################################
 
 ## Définitions du champs d'application
 ```catala-metadata	
@@ -219,9 +226,89 @@ scope TestConditionTwo_1:
 
 ####################### FIN CONDITION 2 #######################
 
+####################### DEBUT CONDITION 3 #######################
+# Si le contribuable est inapte et qu’il utilise une propriété comme résidence principale 
+# pendant une période totale d’au moins un an au cours des cinq années se terminant à la date 
+# de la vente de la propriété alors il est l’utilisateur de la résidence.
+##################################################################
 
+## Définitions du champs d'application
+```catala-metadata
+declaration scope ConditionThree:
+  output valid_cond3 content boolean
+  input contribuable content Contribuable
+  input vente content Vente
+```
 
+## Champs d'application
+```catala
+scope ConditionThree:
+  definition valid_cond3 equals(
+    if contribuable.inapte = true 
+      and vente.date_fin_occupation - vente.date_debut_occupation >= 365 day 
+      and vente.date_vente - vente.date_fin_occupation <= 1826 day then true
+    else false
+  )
+```
 
+## Test unitaire n°3
+## Un contribuable célibataire qui as habité dans une maison pendant 2 an
+## Condition 3 doit être validé
+#### Executer : catala Interpret --scope=TestConditionThree_1 us_impot.catala_en
+```catala
+declaration scope TestConditionThree_1:
+  condition3 scope ConditionThree
+  output test_cond3 content boolean
 
+scope TestConditionThree_1:
+  definition condition3.contribuable equals
+  Contribuable {
+      -- revenu_brut: $100,000
+      -- statut: CELIBATAIRE
+      -- date_deces: |2020-01-01|
+      -- inapte: true
+    }
 
+  definition condition3.vente equals
+  Vente {
+      -- gain: $240,000
+      -- date_vente: |2020-01-01|
+      -- date_debut_occupation: |2017-01-01|
+      -- date_fin_occupation: |2019-01-01|
+    }
 
+  definition test_cond3 equals condition3.valid_cond3
+  assertion test_cond3
+```
+
+## Test unitaire n°4
+## Un contribuable célibataire qui as habité dans une maison moins d' 1 an
+## Condition 3 doit être invalidé
+#### Executer : catala Interpret --scope=TestConditionThree_2 us_impot.catala_en
+```catala
+declaration scope TestConditionThree_2:
+  condition3 scope ConditionThree
+  output test_cond3 content boolean
+
+scope TestConditionThree_2:
+  definition condition3.contribuable equals
+  Contribuable {
+      -- revenu_brut: $100,000
+      -- statut: CELIBATAIRE
+      -- date_deces: |2020-01-01|
+      -- inapte: true
+    }
+
+  definition condition3.vente equals
+  Vente {
+      -- gain: $240,000
+      -- date_vente: |2020-01-01|
+      -- date_debut_occupation: |2017-01-01|
+      -- date_fin_occupation: |2017-01-02|
+    }
+
+  definition test_cond3 equals condition3.valid_cond3
+  assertion not test_cond3
+```
+
+####################### FIN CONDITION 3 #######################
