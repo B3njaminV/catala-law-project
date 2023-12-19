@@ -33,6 +33,9 @@ la date de la vente de la résidence principale.
 d’imposition la vente d’une résidence principale. Dans ce cas de figure, le gain peut
 dépasser les 250,000$ mais ne peut pas excéder les 500,000$.h
 
+### Paramètre 3 :
+*Si le contribuable est inapte et qu’il utilise une propriété comme résidence principale pendant une période totale d’au moins un an au cours des cinq années se terminant à la date de la vente de la propriété alors il est l’utilisateur de la résidence.*
+
 ## 🚀 Etapes pour coder un paramètre
 - [x] Traduction
 - [x] Analyse
