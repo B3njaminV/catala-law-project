@@ -1,0 +1,18 @@
+# Calcul de Moyenne
+
+## Code Catala
+```catala-metadata
+déclaration champ d'application Moyenne:
+  entrée notes contenu liste de entier
+  interne nb_notes contenu entier
+  interne total contenu entier
+  résultat moy contenu décimal
+```
+
+```catala
+champ d'application Moyenne:
+  définition nb_notes égal à nombre de notes
+  définition total égal à somme entier de (i * i) pour i parmi notes
+  définition moy égal à total / nb_notes
+```
+
