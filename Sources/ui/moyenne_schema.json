@@ -1,0 +1,16 @@
+{
+   "type": "object",
+   "definitions": {
+      
+   },
+   "properties": {
+      "notesIn": {
+        "type": "array",
+        "default": [],
+        "items": {
+          "type": "number",
+          "default": 0
+        }
+      }
+   }
+}
