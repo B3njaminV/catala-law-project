@@ -16,7 +16,7 @@ Catala est un langage de programmation qui a été créé dans le but de remédi
 
 Dans ce projet, le texte de loi traduit en Catala s'intitule « 26 U.S. Code § 121 - Exclusion of gain from sale of principal residence ». Ce texte est un article du code des États-Unis d’Amérique traitant des limites et des règles spécifiques concernant l’abattement d’impôt sur une plus-value réalisée lors de la vente d’une résidence principale.
 
-## ‍💻 Paramètre
+## ‍💻 Premier semestre - Traduction de paramètres
 
 ### Paramètre 1 :
 *Le revenu brut du contribuable ne doit pas prendre en compte le gain résultant de la
@@ -36,12 +36,10 @@ dépasser les 250,000$ mais ne peut pas excéder les 500,000$.h
 ### Paramètre 3 :
 *Si le contribuable est inapte et qu’il utilise une propriété comme résidence principale pendant une période totale d’au moins un an au cours des cinq années se terminant à la date de la vente de la propriété alors il est l’utilisateur de la résidence.*
 
-## 🚀 Etapes pour coder un paramètre
-- [x] Traduction
-- [x] Analyse
-- [x] Modélisation
-- [x] Développement
- 
+## ‍💻 Second semestre - Développer une interface graphique pour Catala
+
+L'objectif de ce semestre est de développer une interface graphique pour le langage Catala. Cette interface graphique doit permettre à l'utilisateur de saisir des données et d'obtenir un résultat par le biais d'un code Catala.
+
 ## ✍️ Auteur
 
 👤 **VALLEIX Benjamin**
